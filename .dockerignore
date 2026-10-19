@@ -1,0 +1,8 @@
+**
+!Dockerfile
+!scripts/
+!scripts/*.py
+!scripts/*.sh
+!sources.lock.json
+!LICENSE
+!THIRD_PARTY.md

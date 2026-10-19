@@ -1,0 +1,10 @@
+.build-inputs/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+*.log
+data/
+*.tar
+*.tar.gz

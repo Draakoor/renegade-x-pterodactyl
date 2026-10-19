@@ -1,0 +1,25 @@
+{
+  "recorded_at": "2026-10-20",
+  "platform": "linux/amd64",
+  "base_image": "ghcr.io/ptero-eggs/yolks@sha256:db48c30fc50104a43d951200174d33e2b9200f80b03b3ded9c106586450dbcf8",
+  "base_tag_at_recording": "wine_latest",
+  "downloads": {
+    "tapatcher.exe": {
+      "url": "https://ta-downloads.totemarts.games/ta-patcher-cli/tapatcher.exe",
+      "sha256": "8d9cfa06d97d541d07c75c783bd818dcaf8832e9f1ef6951dff87e64f9d21644"
+    },
+    "xdelta3.exe": {
+      "url": "https://ta-downloads.totemarts.games/ta-patcher-cli/xdelta3-3.0.11-x86_64.exe",
+      "sha256": "d81f59b2fe5e8589c0ee9782e231c805084f4d23dfade413903a4cad63b4e342"
+    }
+  },
+  "game": {
+    "product": "renegade_x",
+    "channel": "official patcher default",
+    "reference_version": "1.2.1109",
+    "reference_page": "https://forums.totemarts.games/files/file/148-renegade-x/",
+    "version_pinned": false
+  },
+  "wine_components": ["vcrun2008", "vcrun2010", "d3dx9", "xact", "win10"],
+  "notes": "The base digest pins Wine and Winetricks. Winetricks verifies its own upstream redistributables during installation. The TA patcher selects and verifies game content; the reference game version is not a content lock."
+}

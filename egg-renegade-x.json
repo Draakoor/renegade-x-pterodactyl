@@ -1,0 +1,102 @@
+{
+  "_comment": "Runtime untested. Build and publication only; no game server was started.",
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": null
+  },
+  "exported_at": "2026-10-20T00:00:00+00:00",
+  "name": "Renegade X",
+  "author": "draakoor@users.noreply.github.com",
+  "description": "Renegade X multiplayer under Wine (Linux/amd64). Explicit installation through the official TA patcher. No automatic updates on startup. Runtime, join, RCON and shutdown have not been tested. See the repository README before use.",
+  "features": [],
+  "docker_images": {
+    "Renegade X Wine runtime 0.1.0 (amd64)": "ghcr.io/draakoor/renegade-x-pterodactyl:0.1.0"
+  },
+  "file_denylist": [],
+  "startup": "/opt/renegade-x/entrypoint.sh start",
+  "config": {
+    "files": "{}",
+    "startup": "{\"done\": \"[Renegade X] Server ready.\"}",
+    "logs": "{}",
+    "stop": "quit"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/bash\nset -euo pipefail\nexec /opt/renegade-x/entrypoint.sh install /mnt/server\n",
+      "container": "ghcr.io/draakoor/renegade-x-pterodactyl:0.1.0",
+      "entrypoint": "/bin/bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Server name",
+      "description": "Displayed server name. No control characters, double quotes or backslashes.",
+      "env_variable": "SERVER_NAME",
+      "default_value": "Renegade X Server",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:96",
+      "field_type": "text"
+    },
+    {
+      "name": "Starting map",
+      "description": "Installed map name without extension. Map rotation remains in game/UDKGame/Config/UDKGame.ini.",
+      "env_variable": "START_MAP",
+      "default_value": "CNC-Field",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:96|regex:/^[A-Za-z0-9_-]+$/",
+      "field_type": "text"
+    },
+    {
+      "name": "Maximum players",
+      "description": "Player limit. Capacity and performance have not been measured.",
+      "env_variable": "MAX_PLAYERS",
+      "default_value": "40",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|min:1|max:64",
+      "field_type": "text"
+    },
+    {
+      "name": "Steam query port",
+      "description": "Assign this UDP port as an additional allocation. Must differ from game and RCON ports.",
+      "env_variable": "QUERY_PORT",
+      "default_value": "27015",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|min:1024|max:65535",
+      "field_type": "text"
+    },
+    {
+      "name": "Internal RCON port",
+      "description": "TCP port used by the native console bridge. Do not assign a public allocation for it. Must differ from other ports.",
+      "env_variable": "RCON_PORT",
+      "default_value": "7779",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|min:1024|max:65535",
+      "field_type": "text"
+    },
+    {
+      "name": "Administrator password",
+      "description": "Required for native RCON and in-game administration. Use 12-128 characters: letters, numbers and _.@%+=:,!-. No default password.",
+      "env_variable": "ADMIN_PASSWORD",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|min:12|max:128|regex:/^[A-Za-z0-9_.@%+=:,!-]+$/",
+      "field_type": "text"
+    },
+    {
+      "name": "Game password",
+      "description": "Optional join password. Empty allows joining without a password. Allowed: letters, numbers and _.@%+=:,!-.",
+      "env_variable": "SERVER_PASSWORD",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:64|regex:/^[A-Za-z0-9_.@%+=:,!-]+$/",
+      "field_type": "text"
+    }
+  ]
+}

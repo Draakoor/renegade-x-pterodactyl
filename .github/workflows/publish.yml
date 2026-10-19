@@ -1,0 +1,76 @@
+name: Build and publish image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Image release version (not the game version)
+        required: true
+        default: '0.1.0'
+  push:
+    tags:
+      - 'v[0-9]*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-renegade-x
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out build files
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Select image version
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            version="$REQUESTED_VERSION"
+          else
+            version="${REF_NAME#v}"
+          fi
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Invalid release version'; exit 1; }
+          [[ "$version" == "$(cat VERSION)" ]] || { echo 'Release must match VERSION'; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "commit_tag=sha-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Sign in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish (no server startup or tests)
+        id: image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            IMAGE_VERSION=${{ steps.release.outputs.version }}
+            VCS_REF=${{ github.sha }}
+          tags: |
+            ghcr.io/draakoor/renegade-x-pterodactyl:${{ steps.release.outputs.version }}
+            ghcr.io/draakoor/renegade-x-pterodactyl:latest
+            ghcr.io/draakoor/renegade-x-pterodactyl:${{ steps.release.outputs.commit_tag }}
+      - name: Record published artifact
+        env:
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          printf 'Image: `ghcr.io/draakoor/renegade-x-pterodactyl@%s`\n\n' "$IMAGE_DIGEST" >> "$GITHUB_STEP_SUMMARY"
+          printf 'Build and publication only. No game installation, startup, join, RCON or shutdown tests were run.\n' >> "$GITHUB_STEP_SUMMARY"
